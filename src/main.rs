@@ -8,48 +8,83 @@ fn main()
 fn manage_front_end()
 {
     println!("");
-    println!("Welcome! Do you want to calculate the digamma function or the natural logarithm of a number?");
-    println!("For log, type: log");
-    println!("For digamma, type: digamma");
-    let mut function = String::new();
+    println!("Welcome! To get started, type one of the following:");
+    println!("");
+    println!("log");
+    println!("digamma");
+    println!("zeta");
+    println!("____________________________________________________");
+    
+    let mut input = String::new();
+
     io::stdin()
-        .read_line(&mut function)
+        .read_line(&mut input)
         .expect("Failed to read line");
-        if function == ("log\r\n")
-        {
-            println!("");
-            println!("Natural logarithm selected it is");
-            println!("What argument will you be calculating?");
-            let val = input_float();
-            if (val <= 0.0)
-            {
-                println!("Error: Not a valid argument (ln(x) is only defined for x > 0)");
-                manage_front_end();
-                return;
-            }
-            println!("");
-            println!("Please enter an integer representing how precise you want it calculated to (higher # = more precise)");
-            let precision = input_value();
-            println!("");
-            println!("ln({}) = {}", val, logarithm(val, precision.clone()));
+
+        match input.as_str()
+        { 
+            "log\r\n" => log_selected(), 
+            "digamma\r\n" => digamma_selected(),
+            "zeta\r\n" => zeta_selected(),
+            _ => main(), 
         }
-        else if function == ("digamma\r\n")
-        {
-            println!("");
-            println!("Digamma function selected it is");
-            println!("What argument will you be calculating?");
-            let val = input_float();
-            println!("");
-            println!("Please enter an integer representing how precise you want it calculated to (higher # = more precise)");
-            let precision = input_value();
-            println!("");
-            println!("digamma({}) = {}", val, digamma(val, precision.clone()));
-        }
-        else
-        {
-            println!("Failed to read input. Please try again");
-            manage_front_end();
-        }
+}
+
+fn zeta_selected()
+{
+    println!("");
+    println!("zeta function selected");
+    println!("What argument will you be calculating?");
+    let val = input_float();
+    if val <= 0.0
+    {
+        println!("Error: Not a valid argument (zeta(x) is only defined for x > 0 & x != 1)");
+        manage_front_end();
+        return;
+    }
+    println!("");
+    println!("Please enter an integer representing how precise you want it calculated to (higher # = more precise)");
+    let precision = input_value();
+    println!("");
+    println!("zeta({}) = {}", val, zeta(val, precision.clone()));
+}
+
+fn log_selected()
+{
+    println!("");
+    println!("Natural logarithm selected");
+    println!("What argument will you be calculating?");
+    let val = input_float();
+    if val <= 0.0
+    {
+        println!("Error: Not a valid argument (ln(x) is only defined for x > 0)");
+        manage_front_end();
+        return;
+    }
+    println!("");
+    println!("Please enter an integer representing how precise you want it calculated to (higher # = more precise)");
+    let precision = input_value();
+    println!("");
+    println!("ln({}) = {}", val, logarithm(val, precision.clone()));
+}
+
+fn digamma_selected()
+{
+    println!("");
+    println!("Digamma function selected");
+    println!("What argument will you be calculating?");
+    let val = input_float();
+    println!("");
+    println!("Please enter an integer representing how precise you want it calculated to (higher # = more precise)");
+    let precision = input_value();
+    println!("");
+    println!("digamma({}) = {}", val, digamma(val, precision.clone()));
+}
+
+fn failed_input()
+{
+    println!("Failed to read input. Please try again");
+    manage_front_end();
 }
 
 fn input_value() -> u64
@@ -113,4 +148,28 @@ fn digamma(arg: f64, terms: u64) -> f64
         i += 1.0;
     }
     return total - gamma;
+}
+
+fn zeta(arg: f64, terms: u64) -> f64
+{
+    let mut total: f64 = 0.0;
+    let mut i = 1;
+    if (arg < 1.0)
+    {
+        while i < terms
+        {
+            total += (-1.0_f64).powf((i as f64) + 1.0) / ((i as f64).powf(arg));
+            i += 1;
+        }
+        return total * (1.0 / (1.0 - (2.0_f64).powf(1.0 - arg)));
+    }
+    else
+    {
+        while i < terms
+        {
+            total += 1.0 / ((i as f64).powf(arg));
+            i += 1;
+        }
+        return total;
+    }
 }
