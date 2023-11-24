@@ -1,5 +1,7 @@
 use std::io;
 
+const SQRT_PI_2: f64 = 0.88622692545;
+
 fn main()
 {
     manage_front_end();
@@ -13,6 +15,7 @@ fn manage_front_end()
     println!("log");
     println!("digamma");
     println!("zeta");
+    println!("fast gamma");
     println!("____________________________________________________");
     
     let mut input = String::new();
@@ -26,6 +29,7 @@ fn manage_front_end()
             "log\r\n" => log_selected(), 
             "digamma\r\n" => digamma_selected(),
             "zeta\r\n" => zeta_selected(),
+            "fast gamma\r\n" => fast_gamma_selected(),
             _ => main(), 
         }
 }
@@ -81,10 +85,14 @@ fn digamma_selected()
     println!("digamma({}) = {}", val, digamma(val, precision.clone()));
 }
 
-fn failed_input()
+fn fast_gamma_selected()
 {
-    println!("Failed to read input. Please try again");
-    manage_front_end();
+    println!("");
+    println!("Fast gamma function selected");
+    println!("What argument will you be calculating?");
+    let val = input_float();
+    println!("");
+    println!("gamma({}) = {}", val, fast_gamma(val));
 }
 
 fn input_value() -> u64
@@ -154,7 +162,7 @@ fn zeta(arg: f64, terms: u64) -> f64
 {
     let mut total: f64 = 0.0;
     let mut i = 1;
-    if (arg < 1.0)
+    if arg < 1.0
     {
         while i < terms
         {
@@ -172,4 +180,29 @@ fn zeta(arg: f64, terms: u64) -> f64
         }
         return total;
     }
+}
+
+/* Gives a margin of error of about 1% while being extremely fast. */
+fn fast_gamma(arg: f64) -> f64
+{
+    // We want the remainder to be zero if 1 < x < 2
+    let mut remainder = 2 - arg.ceil() as i64;
+    println!("{}", remainder);
+    let base_approx = 0.455 * (arg + remainder as f64 - 1.5) * (arg + remainder as f64 - 1.5) + SQRT_PI_2;
+    let mut total = base_approx;
+    if remainder < 0
+    {
+        while remainder != 0
+        {
+            total *= arg + remainder as f64;
+            remainder += 1;
+        }
+        return total;
+    }
+    while remainder > 0
+    {
+        remainder -= 1;
+        total /= arg + remainder as f64;
+    }
+    return total;
 }
